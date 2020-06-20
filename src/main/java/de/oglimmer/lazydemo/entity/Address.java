@@ -1,6 +1,7 @@
 package de.oglimmer.lazydemo.entity;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,6 +23,7 @@ public class Address {
 
     @ManyToOne
     @JoinColumn(name = "person_id")
+    @ToString.Exclude
     private Person person;
 
 }

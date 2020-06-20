@@ -1,6 +1,7 @@
 package de.oglimmer.lazydemo.entity;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,6 +21,7 @@ public class Person {
     private String name;
 
     @OneToMany(mappedBy = "person")
+    @ToString.Exclude
     private List<Address> addresses;
 
 }

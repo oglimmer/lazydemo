@@ -1,6 +1,7 @@
 package de.oglimmer.lazydemo.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class PersonDto {
 
     private String name;
 
+    @ToString.Exclude
     private List<AddressDto> addresses;
 
 }

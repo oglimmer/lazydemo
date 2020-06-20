@@ -6,12 +6,20 @@ import de.oglimmer.lazydemo.dto.PersonDto;
 import de.oglimmer.lazydemo.entity.Person;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
+
+import static javax.transaction.Transactional.TxType.NEVER;
 
 @Service
 @RequiredArgsConstructor
@@ -22,16 +30,15 @@ public class PersonService {
     @NonNull
     private AddressRepository addressRepository;
 
-    private transient MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+    @NonNull
+    @Resource
+    private PlatformTransactionManager transactionManager;
 
-    {
-//        mapperFactory.classMap(PersonDto.class, Person.class)
-//                .byDefault()
-//                .register();
-//        mapperFactory.classMap(Person.class, PersonDto.class)
-//                .byDefault()
-//                .register();
-    }
+    @NonNull
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
 
     public void createPerson(PersonDto personDto) {
         final MapperFacade mapperFacade = mapperFactory.getMapperFacade();
@@ -44,10 +51,30 @@ public class PersonService {
         mapperFacade.map(newEntity, personDto);
     }
 
+    @SneakyThrows
+    @Transactional(NEVER)
     public List<PersonDto> getPersons() {
         final MapperFacade mapperFacade = mapperFactory.getMapperFacade();
         final List<Person> all = personRepository.findAll();
+
+        // detach all objects
+        entityManager.clear();
+
+        // detach single objects..
+        // entityManager.detach();
+
+        // "disable" exceptions from lazy-loading
+        // all.forEach(e -> {
+        //     e.setAddresses(null);
+        // });
+
+        // Access to TransactionManager
+        // System.out.println(TransactionSynchronizationManager.isActualTransactionActive());
+
         System.out.println("LOADED LIST OF PERSONS");
+
+        // this fails with:
+        // org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: de.oglimmer.lazydemo.entity.Person.addresses, could not initialize proxy - no Session
         return mapperFacade.mapAsList(all, PersonDto.class);
     }
 }
