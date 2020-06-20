@@ -58,7 +58,7 @@ public class PersonService {
         final List<Person> all = personRepository.findAll();
 
         // detach all objects
-        entityManager.clear();
+//        entityManager.clear();
 
         // detach single objects..
         // entityManager.detach();
